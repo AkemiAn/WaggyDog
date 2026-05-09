@@ -1,9 +1,8 @@
+// src/App.js
 import './App.css';
 import './style.scss'
 import { Routes, Route } from 'react-router-dom';
-import Gallery from './components/Gallery/Gallery';
 import Header from './components/Header/Header';
-
 import Footer from './components/Footer/Footer';
 import { useState } from 'react';
 import useLocalStorage from './hooks/useLocalStorage'
@@ -12,27 +11,29 @@ import NotFound from './pages/NotFound/NotFound';
 import Cart from './pages/Cart/Cart';
 import Favourites from './pages/Favourites/Favourites';
 import EmptyUser from './components/EmptyUser/EmptyUser';
-
+import { SearchProvider } from './context/SearchContext';
+import CookieConsent from './components/CookieConsent/CookieConsent'; // Добавьте импорт
 
 function App() {
     const [cart, setCart] = useLocalStorage('cart', []);
     const [favourites, setFavourites] = useLocalStorage('favourites', []);
-    // console.log(cart)
-  return (
-    <div className="App">
-      
-      <Header cart={cart}/>
-      <Routes>
-         <Route index element={<HomePage cart={cart} setCart={setCart} favourites={favourites} setFavourites={setFavourites}/>} />
-         <Route path="/cart" element={<Cart cart={cart} setCart={setCart} favourites={favourites} setFavourites={setFavourites}/>} />
-         <Route path="/favourites" element={<Favourites cart={cart} setCart={setCart} favourites={favourites} setFavourites={setFavourites}/>} />
-          <Route path="/account" element={<EmptyUser />} />
-         <Route path="*" element={<NotFound />} />
-         
-      </Routes>
-      <Footer/>
-    </div>
-  );
+    
+    return (
+        <SearchProvider>
+            <div className="App">
+                <Header cart={cart}/>
+                <Routes>
+                    <Route index element={<HomePage cart={cart} setCart={setCart} favourites={favourites} setFavourites={setFavourites}/>} />
+                    <Route path="/cart" element={<Cart cart={cart} setCart={setCart} favourites={favourites} setFavourites={setFavourites}/>} />
+                    <Route path="/favourites" element={<Favourites cart={cart} setCart={setCart} favourites={favourites} setFavourites={setFavourites}/>} />
+                    <Route path="/account" element={<EmptyUser />} />
+                    <Route path="*" element={<NotFound />} />
+                </Routes>
+                <Footer/>
+                <CookieConsent /> 
+            </div>
+        </SearchProvider>
+    );
 }
 
 export default App;

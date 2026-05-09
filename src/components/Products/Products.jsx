@@ -1,53 +1,88 @@
 import React from "react";
 import "./products.scss";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MdOutlineStar } from "react-icons/md";
-import { FaHeart } from "react-icons/fa";
 import products from "../../assets/data";
 import BtnAddToCart from "../BtnAddToCart/BtnAddToCart";
-import useLocalStorage from "../../hooks/useLocalStorage";
 import AddToFav from "../AddToFav/AddToFav";
+import { useSearch } from "../../context/SearchContext";
 
-function Products({ cart, setCart, favourites, setFavourites }) {
+function Products({ cart, setCart, favourites, setFavourites, searchQuery: propSearchQuery }) {
   const [showCat, setShowCat] = useState(true);
   const [showDog, setShowDog] = useState(true);
   const [showBird, setShowBird] = useState(true);
+  const { clearSearch, searchQuery: contextSearchQuery } = useSearch();
+  
+  
+  const searchTerm = propSearchQuery || contextSearchQuery || "";
 
+
+  useEffect(() => {
+    if (searchTerm) {
+     
+    }
+  }, [searchTerm]);
 
   const filtered = products.filter((product) => {
-    const matchCategory =
-      (!showCat && !showDog && !showBird) ||
-      (product.category === "cat" && showCat) ||
-      (product.category === "dog" && showDog) ||
-      (product.category === "bird" && showBird);
+    
+    const matchCategory = 
+      (showCat && product.category === "cat") ||
+      (showDog && product.category === "dog") ||
+      (showBird && product.category === "bird");
 
-    return matchCategory;
+    
+    const anyCategorySelected = showCat || showDog || showBird;
+    const categoryMatch = anyCategorySelected ? matchCategory : true;
+
+    const matchSearch = searchTerm === "" || 
+      product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchTerm.toLowerCase());
+
+    return categoryMatch && matchSearch;
   });
 
+  
   const grouped = filtered.reduce((acc, product) => {
-    acc[product.category] ??= [];
+    if (!acc[product.category]) {
+      acc[product.category] = [];
+    }
     acc[product.category].push(product);
     return acc;
   }, {});
 
-  const selectCat = () => {
-    setShowBird(false);
-    setShowDog(false);
-    setShowCat(true);
+  const handleClearSearch = () => {
+    clearSearch();
   };
-  //console.log(grouped)
 
+  
+  const resetFilters = () => {
+    setShowCat(true);
+    setShowDog(true);
+    setShowBird(true);
+    handleClearSearch();
+  };
 
   return (
     <section className="products">
       <div className="products__top">
         <h1 className="products__top-title">Products</h1>
+        
+        
+        {searchTerm && (
+          <div className="search-active">
+            <span> Search results for: "<strong>{searchTerm}</strong>"</span>
+            <button onClick={handleClearSearch} className="clear-search">
+              ✕ Clear
+            </button>
+          </div>
+        )}
+
         <div className="products__top-filter">
           <label>
             <input
               type="radio"
               name="category"
-              value="all"
+              defaultChecked
               onChange={() => {
                 setShowCat(true);
                 setShowDog(true);
@@ -60,7 +95,6 @@ function Products({ cart, setCart, favourites, setFavourites }) {
             <input
               type="radio"
               name="category"
-              value="cat"
               onChange={() => {
                 setShowCat(true);
                 setShowDog(false);
@@ -73,7 +107,6 @@ function Products({ cart, setCart, favourites, setFavourites }) {
             <input
               type="radio"
               name="category"
-              value="dog"
               onChange={() => {
                 setShowCat(false);
                 setShowDog(true);
@@ -86,7 +119,6 @@ function Products({ cart, setCart, favourites, setFavourites }) {
             <input
               type="radio"
               name="category"
-              value="bird"
               onChange={() => {
                 setShowCat(false);
                 setShowDog(false);
@@ -96,31 +128,43 @@ function Products({ cart, setCart, favourites, setFavourites }) {
             BIRD
           </label>
         </div>
-        <button className="products__top-btn">SHOP ALL</button>
+        
+        <button onClick={resetFilters} className="products__top-btn">
+          RESET ALL
+        </button>
       </div>
+      
       <div className="products__catalog">
-        {Object.entries(grouped).map(([category, products]) => {
-          return (
-            products.map((product, index) => {
-              return (
-                <div className="products__catalog-card" key={index}>
-                  <img src={product.img} alt="" className="card-img" />
+        {filtered.length === 0 ? (
+          <div className="no-results">
+            <p>😕 No products found matching "<strong>{searchTerm}</strong>"</p>
+            <button onClick={handleClearSearch} className="clear-search-btn">
+              Clear Search
+            </button>
+          </div>
+        ) : (
+          Object.entries(grouped).map(([category, categoryProducts]) => (
+            <React.Fragment key={category}>
+              {categoryProducts.map((product, index) => (
+                <div className="products__catalog-card" key={product.id || index}>
+                  <img src={product.img} alt={product.title} className="card-img" />
                   <div className="card-info">
                     <h3 className="card-title">{product.title}</h3>
                     <div className="card-rating">
-                      <MdOutlineStar style={{ color: '#DEAD6F' }}/> <p>{product.rating}</p>
+                      <MdOutlineStar style={{ color: '#DEAD6F' }} /> 
+                      <p>{product.rating}</p>
                     </div>
                     <p className="card-price">${product.price}</p>
                     <div className="card-btns">
-                      <BtnAddToCart product={product} setCart={setCart} cart={cart}/>
-                     <AddToFav product={product} setFavourites={setFavourites} favourites={favourites}/>
+                      <BtnAddToCart product={product} setCart={setCart} cart={cart} />
+                      <AddToFav product={product} setFavourites={setFavourites} favourites={favourites} />
                     </div>
                   </div>
                 </div>
-              );
-            })
-          )
-        })}
+              ))}
+            </React.Fragment>
+          ))
+        )}
       </div>
     </section>
   );

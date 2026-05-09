@@ -13,6 +13,41 @@ color: #41403E;
             color: #908F8D;
             border: 1px solid #908F8D;
             outline: none;
+            
+            
+            .search-form {
+                display: flex;
+                position: relative;
+                
+                input {
+                    padding: 5px 30px 5px 10px;
+                    border: none;
+                    outline: none;
+                    background: transparent;
+                    color: #41403E;
+                    width: 300px;
+                    
+                    &::placeholder {
+                        color: #908F8D;
+                    }
+                }
+                
+                .search-button {
+                    position: absolute;
+                    right: 5px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    color: #908F8D;
+                    padding: 0;
+                    
+                    &:hover {
+                        color: #DEAD6F;
+                    }
+                }
+            }
         }
 
         &-contacts {
@@ -26,7 +61,7 @@ color: #41403E;
         padding: 1% 20%;
         flex-direction: row;
         gap: 20%;
-        // width: 100vw;
+        
         border-bottom: #EDEDED 1px solid;
         border-top: #EDEDED 1px solid;
 
